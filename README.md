@@ -3,6 +3,9 @@ This app generates Unicode keyboard "Layouts" for Corsair CUE-enabled keyboards.
 
 Useful when you want to send code, math, or emphasized words over a messenger like WhatsApp or Telegram. Also might be useful for security testing because these strings are 𝘯𝘢𝘶𝘨𝘩𝘵𝘺.
 
+Here's what you should see:
+![Unicode symbols](http://i.imgur.com/OYmALfw.png)
+
 ## Setup
 1. You will need a Corsair keyboard and Corsair software called CUE.
 2. In CUE create a new Profile. In that Profile create a Mode called "Symbols Template". This will be the base mode for "layouts". Modify assignments and lighting at will; A-Z and 0-9 assignments will be overriden.
