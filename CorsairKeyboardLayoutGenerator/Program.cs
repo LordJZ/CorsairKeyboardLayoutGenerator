@@ -148,6 +148,7 @@ namespace CorsairKeyboardLayoutGenerator
                     newMode.Attributes.RemoveNamedItem("key");
                     newMode.SelectSingleNode("name").InnerText = "Symbols (" + layoutName + ")";
                     newMode.SelectSingleNode("id").InnerText = guid.ToString("B");
+                    newMode.SelectSingleNode("skipped").InnerText = layoutName.Contains("shift") ? "1" : "0";
                     template.ParentNode.InsertAfter(newMode, template);
 
                     DoLayout(layout, newMode);
