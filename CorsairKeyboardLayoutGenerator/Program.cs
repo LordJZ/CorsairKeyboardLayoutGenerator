@@ -107,8 +107,18 @@ namespace CorsairKeyboardLayoutGenerator
 
         static void Main(string[] args)
         {
+            string input =
+                args.FirstOrDefault() ??
+                System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    "All profiles.prf");
+
+            string output =
+                args.Skip(1).FirstOrDefault() ??
+                System.IO.Path.ChangeExtension(input, ".patched" + System.IO.Path.GetExtension(input));
+
             XmlDocument xml = new XmlDocument();
-            xml.Load("D:\\Downloads\\All profiles 4.prf");
+            xml.Load(input);
 
             Dictionary<Guid, XmlNode[]> Modes =
                 xml.SelectNodes("//device/modes/mode")
@@ -195,7 +205,15 @@ namespace CorsairKeyboardLayoutGenerator
                 actionsNode.AppendChild(newAction);
             }
 
-            xml.Save("D:\\Downloads\\patched-profiles.prf");
+            XmlWriterSettings settings = new XmlWriterSettings
+            {
+                NewLineChars = "\n",
+                Indent = true,
+                IndentChars = " "
+            };
+
+            using (XmlWriter writer = XmlWriter.Create(output, settings))
+                xml.Save(writer);
         }
 
         static void DoLayout(Layout layout, XmlNode mode)
