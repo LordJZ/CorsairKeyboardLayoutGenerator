@@ -89,6 +89,15 @@ namespace CorsairKeyboardLayoutGenerator
             return new Guid(bytes);
         }
 
+        static Guid BaseSwitchActionGuid = new Guid("CECD94C6-9F92-4E08-9D53-8222754D3DF1");
+
+        static Guid MakeSwitchActionGuid(string targetLayoutName)
+        {
+            byte[] bytes = BaseSwitchActionGuid.ToByteArray();
+            Array.Copy(BitConverter.GetBytes(DeterministicHashString(targetLayoutName)), 0, bytes, 16 - 4, 4);
+            return new Guid(bytes);
+        }
+
         static int DeterministicHashString(string s)
         {
             if (s == null)
@@ -140,7 +149,7 @@ namespace CorsairKeyboardLayoutGenerator
                 if (Modes.TryGetValue(guid, out modes))
                 {
                     foreach (XmlNode mode in modes)
-                        DoLayout(layout, mode);
+                        DoLayout(layoutName, layout, mode);
                 }
                 else
                 {
@@ -151,7 +160,7 @@ namespace CorsairKeyboardLayoutGenerator
                     newMode.SelectSingleNode("skipped").InnerText = layoutName.Contains("shift") ? "1" : "0";
                     template.ParentNode.InsertAfter(newMode, template);
 
-                    DoLayout(layout, newMode);
+                    DoLayout(layoutName, layout, newMode);
                 }
             }
 
@@ -206,6 +215,47 @@ namespace CorsairKeyboardLayoutGenerator
                 actionsNode.AppendChild(newAction);
             }
 
+            foreach (string targetLayoutName in Layouts.Keys.Where(key => key.Contains("shift")))
+            {
+                Guid actionGuid = MakeSwitchActionGuid(targetLayoutName);
+                if (actions.Contains(actionGuid))
+                    continue;
+
+                Guid targetGuid = MakeLayoutGuid(targetLayoutName);
+
+                XmlDocumentFragment newAction = xml.CreateDocumentFragment();
+                newAction.InnerXml = $@"
+  <Action version=""7"" Type=""modeSwitch"">
+   <Id>{actionGuid.ToString("B")}</Id>
+   <Name>Mode switching to Symbols ({SecurityElement.Escape(targetLayoutName)})</Name>
+   <Note></Note>
+   <Date>2016-03-25</Date>
+   <BindCounter>1</BindCounter>
+   <Visible>0</Visible>
+   <Predefined>0</Predefined>
+   <ExecutionHints>
+    <ExecEvent>press</ExecEvent>
+    <TerminateWhenStartedAgain>false</TerminateWhenStartedAgain>
+    <RestartWhenStartedAgain>false</RestartWhenStartedAgain>
+   </ExecutionHints>
+   <RepeatOptions version=""1"">
+    <Mode>1</Mode>
+    <DelayMode>0</DelayMode>
+    <AmountOfRepeats>1</AmountOfRepeats>
+    <Delay>0</Delay>
+    <RandomDelayFrom>0</RandomDelayFrom>
+    <RandomDelayTo>0</RandomDelayTo>
+   </RepeatOptions>
+   <ActionLighting>{{00000000-0000-0000-0000-000000000000}}</ActionLighting>
+   <SwitchingType>1</SwitchingType>
+   <DirectModeId>{targetGuid.ToString("B")}</DirectModeId>
+   <OptionSelected>1</OptionSelected>
+   <MKeyName></MKeyName>
+  </Action>";
+
+                actionsNode.AppendChild(newAction);
+            }
+
             XmlWriterSettings settings = new XmlWriterSettings
             {
                 NewLineChars = "\n",
@@ -217,7 +267,7 @@ namespace CorsairKeyboardLayoutGenerator
                 xml.Save(writer);
         }
 
-        static void DoLayout(Layout layout, XmlNode mode)
+        static void DoLayout(string layoutName, Layout layout, XmlNode mode)
         {
             XmlNode assignments = mode.SelectSingleNode("assigments");
             int[] letterTable = layout.KeyTable;
@@ -229,16 +279,22 @@ namespace CorsairKeyboardLayoutGenerator
                            .Attributes["action"].InnerText = key.ToString("B");
             }
 
-            if (layout.NumTableName == null)
-                return;
-
-            int[] numberTable = layout.NumberTable;
-
-            for (int i = 0; i < 10; i++)
+            if (layout.NumTableName != null)
             {
-                Guid key = MakeKeyGuid(numberTable[i]);
-                assignments.SelectSingleNode("assigment[@key='" + i + "']")
-                           .Attributes["action"].InnerText = key.ToString("B");
+                int[] numberTable = layout.NumberTable;
+
+                for (int i = 0; i < 10; i++)
+                {
+                    Guid key = MakeKeyGuid(numberTable[i]);
+                    assignments.SelectSingleNode("assigment[@key='" + i + "']")
+                               .Attributes["action"].InnerText = key.ToString("B");
+                }
+            }
+
+            if (!layoutName.Contains("shift") && Layouts.ContainsKey(layoutName + " shift"))
+            {
+                assignments.SelectSingleNode("assigment[@key='LeftShift']")
+                           .Attributes["action"].InnerText = MakeSwitchActionGuid(layoutName + " shift").ToString("B");
             }
         }
     }
