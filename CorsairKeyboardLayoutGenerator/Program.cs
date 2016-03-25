@@ -29,24 +29,6 @@ namespace CorsairKeyboardLayoutGenerator
             public int[] NumberTable => NumTableName != ShiftNumTableName ? Tables.Digits[NumTableName] : ShiftNumTable;
         }
 
-        static Guid BaseKeyGuid = new Guid("ED6C43DF-DE13-4FFD-B023-542C2500560E");
-
-        static Guid MakeKeyGuid(int codePoint)
-        {
-            byte[] bytes = BaseKeyGuid.ToByteArray();
-            Array.Copy(BitConverter.GetBytes(codePoint), 0, bytes, 16 - 3, 3);
-            return new Guid(bytes);
-        }
-
-        static Guid BaseLayoutGuid = new Guid("14723125-1CE2-480A-89AA-60BBFA88B22C");
-
-        static Guid MakeLayoutGuid(string name)
-        {
-            byte[] bytes = BaseLayoutGuid.ToByteArray();
-            Array.Copy(BitConverter.GetBytes(DeterministicHashString(name)), 0, bytes, 16 - 4, 4);
-            return new Guid(bytes);
-        }
-
         static readonly Dictionary<string, Layout> Layouts = new Dictionary<string, Layout>
         {
             { "serif bold", new Layout("serif bold", 26, "bold") },
@@ -89,6 +71,24 @@ namespace CorsairKeyboardLayoutGenerator
             { "double-struck bold shift", new Layout("double-struck bold", 0, ShiftNumTableName) },
         };
 
+        static Guid BaseKeyGuid = new Guid("ED6C43DF-DE13-4FFD-B023-542C2500560E");
+
+        static Guid MakeKeyGuid(int codePoint)
+        {
+            byte[] bytes = BaseKeyGuid.ToByteArray();
+            Array.Copy(BitConverter.GetBytes(codePoint), 0, bytes, 16 - 3, 3);
+            return new Guid(bytes);
+        }
+
+        static Guid BaseLayoutGuid = new Guid("14723125-1CE2-480A-89AA-60BBFA88B22C");
+
+        static Guid MakeLayoutGuid(string name)
+        {
+            byte[] bytes = BaseLayoutGuid.ToByteArray();
+            Array.Copy(BitConverter.GetBytes(DeterministicHashString(name)), 0, bytes, 16 - 4, 4);
+            return new Guid(bytes);
+        }
+
         static int DeterministicHashString(string s)
         {
             if (s == null)
@@ -105,19 +105,16 @@ namespace CorsairKeyboardLayoutGenerator
             }
         }
 
-        static XmlDocument xml;
-
-        static Dictionary<Guid, XmlNode[]> Modes;
-
         static void Main(string[] args)
         {
-            xml = new XmlDocument();
+            XmlDocument xml = new XmlDocument();
             xml.Load("D:\\Downloads\\All profiles 4.prf");
 
-            Modes = xml.SelectNodes("//device/modes/mode")
-                       .Cast<XmlNode>()
-                       .GroupBy(n => Guid.Parse(n.SelectSingleNode("id").InnerText))
-                       .ToDictionary(n => n.Key, n => n.ToArray());
+            Dictionary<Guid, XmlNode[]> Modes =
+                xml.SelectNodes("//device/modes/mode")
+                   .Cast<XmlNode>()
+                   .GroupBy(n => Guid.Parse(n.SelectSingleNode("id").InnerText))
+                   .ToDictionary(n => n.Key, n => n.ToArray());
 
             XmlNode template =
                 Modes.Values.SelectMany(n => n)
@@ -167,10 +164,10 @@ namespace CorsairKeyboardLayoutGenerator
 
                 string c = char.ConvertFromUtf32(cp);
                 XmlDocumentFragment newAction = xml.CreateDocumentFragment();
-                newAction.InnerXml = @"
+                newAction.InnerXml = $@"
 <Action version=""7"" Type=""text"">
-   <Id>" + key.ToString("B") + @"</Id>
-   <Name>Text " + SecurityElement.Escape(c) + " (U+" + cp.ToString("X4") + ")" + @"</Name>
+   <Id>{key.ToString("B")}</Id>
+   <Name>Text {SecurityElement.Escape(c)} (U+{cp.ToString("X4")})</Name>
    <Note></Note>
    <Date>2016-03-20</Date>
    <BindCounter>2</BindCounter>
@@ -189,8 +186,8 @@ namespace CorsairKeyboardLayoutGenerator
     <RandomDelayFrom>0</RandomDelayFrom>
     <RandomDelayTo>0</RandomDelayTo>
    </RepeatOptions>
-   <ActionLighting>{00000000-0000-0000-0000-000000000000}</ActionLighting>
-   <Text>" + SecurityElement.Escape(c) + @"</Text>
+   <ActionLighting>{{00000000-0000-0000-0000-000000000000}}</ActionLighting>
+   <Text>{SecurityElement.Escape(c)}</Text>
    <CharDelay>0</CharDelay>
    <TextInsertionType>1</TextInsertionType>
   </Action>";
