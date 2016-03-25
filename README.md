@@ -12,7 +12,7 @@ Here's what you should see:
 3. Export all profiles to My Documents file "All profiles.prf" (this is the default, see below for non-default).
 4. Run CorsairKeyboardLayoutGenerator.exe, it should flash the console window and exit.
 5. Import all profiles from My Documents file "All profiles.patched.prf". Click update everywhere.
-6. Now you have a ton more Modes in that Profile. "Shift" are the ones that are meant to be used while Shift is pressed, set a key assignment for that (switch to mode while pressed).
+6. Now you have a ton more Modes in that Profile. "Shift" are used while Shift is pressed.
 
 ### Advanced
   `CorsairKeyboardLayoutGenerator.exe <input_file> <output_file>`
