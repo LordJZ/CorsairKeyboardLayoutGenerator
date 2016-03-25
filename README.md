@@ -4,7 +4,7 @@ This app generates Unicode keyboard "Layouts" for Corsair CUE-enabled keyboards.
 Useful when you want to send code, math, or emphasized words over a messenger like WhatsApp or Telegram. Also might be useful for security testing because these strings are 𝘯𝘢𝘶𝘨𝘩𝘵𝘺.
 
 Here's what you should see:
-![Unicode symbols](http://i.imgur.com/OYmALfw.png)
+![Unicode symbols](https://i.imgur.com/OYmALfw.png)
 
 ## Setup
 1. You will need a Corsair keyboard and Corsair software called CUE.
