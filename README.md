@@ -10,7 +10,7 @@ Here's what you should see:
 1. You will need a Corsair keyboard and Corsair software called CUE.
 2. In CUE create a new Profile. In that Profile create a Mode called "Symbols Template". This will be the base mode for "layouts". Modify assignments and lighting at will; A-Z and 0-9 assignments will be overriden.
 3. Export all profiles to My Documents file "All profiles.prf" (this is the default, see below for non-default).
-4. Run CorsairKeyboardLayoutGenerator.exe, it should flash the console window and exit.
+4. [Download](https://github.com/LordJZ/CorsairKeyboardLayoutGenerator/releases/download/v1.0/CorsairKeyboardLayoutGenerator.exe) and run CorsairKeyboardLayoutGenerator.exe, it should flash the console window and exit.
 5. Import all profiles from My Documents file "All profiles.patched.prf". Click update everywhere.
 6. Now you have a ton more Modes in that Profile. "Shift" are used while Shift is pressed.
 
