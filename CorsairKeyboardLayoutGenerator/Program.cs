@@ -127,7 +127,14 @@ namespace CorsairKeyboardLayoutGenerator
                 System.IO.Path.ChangeExtension(input, ".patched" + System.IO.Path.GetExtension(input));
 
             XmlDocument xml = new XmlDocument();
-            xml.Load(input);
+            try
+            {
+                xml.Load(input);
+            }
+            catch (Exception e)
+            {
+                throw new ApplicationException("Could not read file " + input, e);
+            }
 
             Dictionary<Guid, XmlNode[]> Modes =
                 xml.SelectNodes("//device/modes/mode")
@@ -137,7 +144,13 @@ namespace CorsairKeyboardLayoutGenerator
 
             XmlNode template =
                 Modes.Values.SelectMany(n => n)
-                     .First(n => n.SelectSingleNode("name").InnerText == "Symbols Template");
+                     .FirstOrDefault(n =>
+                                     n.SelectSingleNode("name").InnerText
+                                      .Replace(" ", "").Replace("'", "").Replace("\"", "").Trim()
+                                      .Equals("SymbolsTemplate", StringComparison.OrdinalIgnoreCase));
+
+            if (template == null)
+                throw new Exception("Could not find mode called 'Symbols Template'");
 
             foreach (KeyValuePair<string, Layout> pair in Layouts)
             {
@@ -263,8 +276,15 @@ namespace CorsairKeyboardLayoutGenerator
                 IndentChars = " "
             };
 
-            using (XmlWriter writer = XmlWriter.Create(output, settings))
-                xml.Save(writer);
+            try
+            {
+                using (XmlWriter writer = XmlWriter.Create(output, settings))
+                    xml.Save(writer);
+            }
+            catch (Exception e)
+            {
+                throw new ApplicationException("Could not save to file " + output, e);
+            }
         }
 
         static void DoLayout(string layoutName, Layout layout, XmlNode mode)
